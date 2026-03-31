@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+beaker_whoami="${BEAKER_WHOAMI:-$(beaker account whoami --format json | jq -r '.[0].name')}"
+python_args=("$@")
+gantry_workdir="$(mktemp -d)"
+
+cleanup() {
+    rm -rf "$gantry_workdir"
+}
+trap cleanup EXIT
+
+if [ "${#python_args[@]}" -eq 0 ]; then
+    python_args=("test")
+fi
+
+cd "$gantry_workdir"
+
+# Run Gantry outside the repo so it doesn't stage the current git checkout.
+gantry run \
+    --workspace ai2/oe-adapt-code \
+    --budget ai2/oe-adapt \
+    --cluster ai2/neptune \
+    --priority high \
+    --gpus 1 \
+    --timeout 5h \
+    --task-name gantry-moses \
+    --docker-image molecularsets/moses \
+    --system-python \
+    --no-logs \
+    --install "echo 'Skipping Gantry Python setup'" \
+    --weka=oe-adapt-default:/weka/oe-adapt-default \
+    -- /bin/bash -lc 'mkdir -p /root && ln -sfn "/weka/oe-adapt-default/'"${beaker_whoami}"'/.config" /root/.config && exec /opt/miniconda/bin/python "$@"' bash "${python_args[@]}"
