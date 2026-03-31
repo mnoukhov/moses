@@ -4,18 +4,6 @@ set -euo pipefail
 
 beaker_whoami="${BEAKER_WHOAMI:-$(beaker account whoami --format json | jq -r '.[0].name')}"
 python_args=("$@")
-gantry_workdir="$(mktemp -d)"
-
-cleanup() {
-    rm -rf "$gantry_workdir"
-}
-trap cleanup EXIT
-
-if [ "${#python_args[@]}" -eq 0 ]; then
-    python_args=("test")
-fi
-
-cd "$gantry_workdir"
 
 # Run Gantry outside the repo so it doesn't stage the current git checkout.
 gantry run \
