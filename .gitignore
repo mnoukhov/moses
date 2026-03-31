@@ -1,0 +1,14 @@
+.DS_store
+.idea/
+*__pycache__*
+build/
+dist/
+moses.egg-info/
+results/
+*_molecules.json
+data/
+moses/dataset/data/
+moses/latentgan/heteroencoder_models/
+images/
+moses/metrics/NP_Score/publicnp.model.gz
+moses/metrics/SA_Score/fpscores.pkl.gz
